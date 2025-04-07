@@ -31,6 +31,11 @@ urlpatterns = [
     path('logout/', auth_views.LogoutView.as_view(next_page='/login'), name='logout'),
     path('register/', views.register, name='register'),
     path('comment/<int:post_id>/', views.add_comment, name='add_comment'),
+    path('upload/', views.create_post, name='create_post'),
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

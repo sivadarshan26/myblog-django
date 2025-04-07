@@ -1,0 +1,41 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Create Post - Blogtopia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 p-8">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold">Create a New Post</h1>
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded"
+        >
+          Logout
+        </button>
+      </form>
+      {% else %}
+      <a href="{% url 'login' %}" class="text-blue-500 hover:underline"
+        >Login</a
+      >
+      {% endif %}
+    </div>
+    <div class="bg-white p-6 rounded shadow-md max-w-xl mx-auto">
+      <form method="post" enctype="multipart/form-data">
+        {% csrf_token %} {{ form.as_p }}
+        <button
+          type="submit"
+          class="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded"
+        >
+          Submit Post
+        </button>
+      </form>
+    </div>
+  </body>
+</html>

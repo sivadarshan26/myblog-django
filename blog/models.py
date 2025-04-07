@@ -9,6 +9,7 @@ class BlogPost(models.Model):
     content = models.TextField()
     image = models.ImageField(upload_to='post_images/', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from .models import BlogPost as Post  # or your relevant model
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
@@ -7,6 +6,8 @@ from django.http import JsonResponse
 from .models import BlogPost, Like
 from django.contrib.auth.decorators import login_required
 from .forms import CommentForm
+from .forms import BlogPostForm
+
 
 def homepage(request):
     posts = Post.objects.all().order_by('-created_at')
@@ -57,3 +58,16 @@ def register(request):
     else:
         form = UserCreationForm()
     return render(request, 'register.html', {'form': form})
+
+@login_required
+def create_post(request):
+    if request.method == 'POST':
+        form = BlogPostForm(request.POST, request.FILES)
+        if form.is_valid():
+            post = form.save(commit=False)
+            post.author = request.user
+            post.save()
+            return redirect('homepage')
+    else:
+        form = BlogPostForm()
+    return render(request, 'blog/create_post.html', {'form': form})
