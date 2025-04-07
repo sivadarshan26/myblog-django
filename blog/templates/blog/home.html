@@ -1,0 +1,127 @@
+{% load custom_tags %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Blogtopia</title>
+    <script>
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+      const csrftoken = getCookie("csrftoken");
+    </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-gray-100 p-8">
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold">My Blog Posts</h1>
+      {% if user.is_authenticated %}
+      <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button
+          type="submit"
+          class="bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded"
+        >
+          Logout
+        </button>
+      </form>
+      {% else %}
+      <a href="{% url 'login' %}" class="text-blue-500 hover:underline">Login</a>
+      {% endif %}
+    </div>
+
+    {% for post in posts %}
+    <div class="bg-white shadow-md rounded-md p-4 mb-6">
+      <h2 class="text-xl font-semibold">{{ post.title }}</h2>
+      <p class="text-gray-500 text-sm">{{ post.created_at }}</p>
+      {% if post.image %}
+      <img
+        src="{{ post.image.url }}"
+        alt="post image"
+        class="max-w-md my-4 rounded"
+      />
+      {% endif %}
+      <p class="text-gray-800">{{ post.content|truncatechars:200 }}</p>
+
+      <button
+        class="like-button mt-3 text-blue-500"
+        data-post-id="{{ post.id }}"
+      >
+        ❤️ Like (<span id="likes-count-{{ post.id }}">{{ post.likes.count }}</span>)
+      </button>
+
+      <!-- Comments Section -->
+      <div class="mt-4 border-t pt-4">
+        <h3 class="font-semibold mb-2 text-gray-700">Comments</h3>
+
+        {% for comment in post.comments.all %}
+        <div class="mb-2 text-sm">
+          <span class="font-semibold text-gray-800">{{ comment.user.username }}</span>
+          <span class="text-gray-600">said:</span>
+          <p class="text-gray-700 ml-2">{{ comment.content }}</p>
+        </div>
+        {% empty %}
+        <p class="text-gray-500 text-sm">No comments yet.</p>
+        {% endfor %}
+
+        {% if user.is_authenticated %}
+        <form method="post" action="{% url 'add_comment' post.id %}" class="mt-2">
+          {% csrf_token %}
+          {% with comment_forms|get_item:post.id as comment_form %}
+            {{ comment_form.as_p }}
+          {% endwith %}
+          <button
+            class="bg-green-500 hover:bg-green-600 text-white py-1 px-3 rounded text-sm mt-1"
+          >
+            Add Comment
+          </button>
+        </form>
+        {% else %}
+        <p class="text-sm mt-2">
+          Please <a href="{% url 'login' %}" class="text-blue-500 underline">login</a> to comment.
+        </p>
+        {% endif %}
+      </div>
+    </div>
+    {% empty %}
+    <p>No posts yet.</p>
+    {% endfor %}
+
+    <script>
+      document.querySelectorAll(".like-button").forEach((button) => {
+        button.addEventListener("click", function () {
+          const postId = this.dataset.postId;
+
+          fetch(`/like/${postId}/`, {
+            method: "POST",
+            headers: {
+              "X-CSRFToken": csrftoken,
+              "X-Requested-With": "XMLHttpRequest",
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              const countSpan = document.getElementById(`likes-count-${postId}`);
+              countSpan.textContent = data.likes_count;
+              this.textContent = data.liked
+                ? `💔 Unlike (${data.likes_count})`
+                : `❤️ Like (${data.likes_count})`;
+            });
+        });
+      });
+    </script>
+  </body>
+</html>
