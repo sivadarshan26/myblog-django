@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'blog',
     'tailwind',
     'theme',
-    "django_browser_reload",
 ]
 
 MIDDLEWARE = [
@@ -55,7 +54,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
 if DEBUG:
